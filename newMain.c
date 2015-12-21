@@ -192,7 +192,7 @@ int main(int argc,char *argv[])
 	
 	else if (my_rank == PROXY)
 	{
-		/********runtimes of queries [2, 7, 8, 9, 12] on rdf********/
+		/********runtimes of queries [2, 7, 8, 9, 12] on rdf*********/
 		char command_rdf[256];
 		char infile[256];
 		char outfile[256];
