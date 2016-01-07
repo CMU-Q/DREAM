@@ -1,4 +1,4 @@
-# DREAM - Distributed RDF Engine with Adaptive Query Planner and Minimal Communication
+### DREAM - Distributed RDF Engine with Adaptive Query Planner and Minimal Communication
 
 RDF and SPARQL query language are gaining wide popularity and acceptance. **DREAM** is a hybrid RDF system, which combines the advantages and averts the disadvantages of the centralized and distributed RDF schemes. In particular, DREAM avoids partitioning RDF datasets and reversely partitions SPARQL queries. By not partitioning datasets, DREAM offers a general paradigm for different types of pattern matching queries and entirely precludes intermediate data shuffling (only auxiliary data are shuffled). By partitioning only queries, DREAM suggests an adaptive scheme, which runs queries on different numbers of machines depending on their complexities. DREAM achieves these goals and significantly outperforms related systems via employing a novel graph-based, rule-oriented query planner and a new cost model.
 
