@@ -25,7 +25,7 @@ The current version of DREAM was tested on Ubuntu Linux 64-bit 14.04. It require
 Dependencies
 ------------------
 
-GraphSim has the following dependencies.
+DREAM has the following dependencies.
 
 1. [g++ (>= 4.8)](https://gcc.gnu.org/gcc-4.8/)
 2. [MPICH (>= 3.1)](https://www.mpich.org/downloads/)
