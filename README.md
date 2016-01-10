@@ -29,7 +29,7 @@ GraphSim has the following dependencies.
 
 1. [g++ (>= 4.8)](https://gcc.gnu.org/gcc-4.8/)
 2. [MPICH (>= 3.1)](https://www.mpich.org/downloads/)
-3. [boost](http://www.boost.org/)
+3. [Boost](http://www.boost.org/)
 4. [TBB](https://www.threadingbuildingblocks.org/) 
 
 
