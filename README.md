@@ -32,6 +32,7 @@ DREAM has the following dependencies.
 3. [Boost](http://www.boost.org/)
 4. [TBB](https://www.threadingbuildingblocks.org/) 
 
+We use the [rdf3x-0.3.8](https://code.google.com/p/rdf3x/downloads/detail?name=rdf3x-0.3.8.zip&can=2&q=) engine as part of DREAM. We use the unpacked binaries [id2name and rdf3xquery](https://github.com/az-hasan/DREAM/wiki/Running-DREAM#rdf3x-binaries).
 
 Usage 
 ----------------
