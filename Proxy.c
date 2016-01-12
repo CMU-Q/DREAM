@@ -72,7 +72,6 @@ void doProxy()
 			|| Q->num_join_nodes - Q->num_merged_nodes <= 1)
 	{
 
-		printf("reached inside proxy handler\n");
 		// debug_print(debug_level, Q_PLAN_LOG, "%s\n", "Number of join nodes <= 1, or 0 workers");		
 		// debug_print(debug_level, Q_PLAN_LOG, " PROXY executing the query %s\n", query);	
 		
@@ -96,7 +95,7 @@ void doProxy()
 		//sprintf(outfile, "Result-Q12", PROXY);
 		//sprintf(timefile, "internal_time_%d.txt", PROXY);
 	
-		printf("infile: \"%s\"\n", infile);
+		//printf("infile: \"%s\"\n", infile);
 		
 		if(!(streamP = fopen(infile, "w+"))) {
 			systemError("Could not open subQ file");
@@ -111,11 +110,7 @@ void doProxy()
 		int sysid = system(command);
 
 		if(sysid < 0)
-			debug_print(debug_level, ERROR_LOG, "%s\n", "Failed to issue make clean");			
-		
-		printf("reached after executing proxy \n");
-		//sprintf(filename, "result_%d.txt", PROXY);
-		
+			debug_print(debug_level, ERROR_LOG, "%s\n", "Failed to issue make clean");					
 
 	}
 	/***** More than one machine is needed to handle query (>1 join node) ****/
@@ -287,8 +282,8 @@ void doProxy()
 	diff_tv.tv_sec = diff / 1000000;
 	diff_tv.tv_usec = diff % 1000000;
 
-	printf("dream: ");
-	printf("%ld.%06ld\n", diff_tv.tv_sec, diff_tv.tv_usec);
+	//printf("dream: ");
+	//printf("%ld.%06ld\n", diff_tv.tv_sec, diff_tv.tv_usec);
 
 	//debug_print(debug_level, COMM_LOG, "TOTAL_TIME: %d\n", diff);	
 

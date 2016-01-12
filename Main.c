@@ -160,31 +160,7 @@ int main(int argc,char *argv[])
 	
 	else if (my_rank == PROXY)
 	{
-		/********runtimes of queries [2, 7, 8, 9, 12] on rdf*********/
-		char command_rdf[256];
-		char infile[256];
-		char outfile[256];
-		struct timeval start_tv;
-		struct timeval end_tv;
-		struct timeval diff_tv;
-
-		sprintf(infile,  "%s/Query%d\0", QUERIES, query_ndx);	
-		sprintf(outfile, "Result-Q%d-rdf\0", query_ndx);	
-		sprintf(command_rdf, "./rdf3x/rdf3xquery %s < %s > %s", 
-						DB, infile, outfile);
-
-		gettimeofday(&start_tv, NULL);
-		system(command_rdf);
-		gettimeofday(&end_tv, NULL);
-
-		long int diff = (end_tv.tv_usec + 1000000 * end_tv.tv_sec) - (start_tv.tv_usec + 1000000 * start_tv.tv_sec);
-		diff_tv.tv_sec = diff / 1000000;
-		diff_tv.tv_usec = diff % 1000000;
-
-		printf("rdf3x: ");
-		printf("%ld.%06ld\n", diff_tv.tv_sec, diff_tv.tv_usec);
-		/*********end runtimes of queries on rdf**********/
-		
+	
 		doProxy();
 	}
 	

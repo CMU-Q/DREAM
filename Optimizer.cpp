@@ -25,7 +25,7 @@ void calculateNetworkSpeed(){
 	int fsize;
 	FILE *stream;
 	
-	if(!(stream = fopen("machinefile", "r"))){
+	if(!(stream = fopen("host_file", "r"))){
 		printf("Could not open machinefile\n");
 	}
 
@@ -34,6 +34,11 @@ void calculateNetworkSpeed(){
 	}
 
 	fclose(stream);
+	
+	char *pos;
+	if((pos = strchr(other_machine, '\n')) != NULL){
+		*pos = '\0';
+	}
 	printf("other machine: %s\n", other_machine);
 
 	//run speed test script to get upload and download speed		
@@ -45,10 +50,9 @@ void calculateNetworkSpeed(){
 	//get upload speed from script
 	if(!(stream = fopen(resultfile, "r")))
 		printf("Could not open network speed result file\n");
-	printf("opened speed.txt\n");
+
 	fscanf(stream, "Upload %Lf kB/s\n", &networkSpeed);
 	fclose(stream);
-	printf("closed speed.txt\n");
 	
 	printf("networkSpeed: %Lf kB/s\n", networkSpeed);
 	networkSpeed *= KILO;
@@ -63,63 +67,24 @@ void getOptimalPlanHelper (Query **Q)
 		calculateNetworkSpeed();
 	}
 	createCompactGraph_v2(Q);
-	printCompactGraph((*Q)->compactGraph, (*Q)->num_join_nodes); //aisha
-	//aisha debug_print(debug_level, Q_PLAN_LOG, "%s\n", "Created compact graph");
+	//printCompactGraph((*Q)->compactGraph, (*Q)->num_join_nodes); //aisha
+	//debug_print(debug_level, Q_PLAN_LOG, "%s\n", "Created compact graph");
 	
 	enumerateAllSets(*Q); //all possible subgraphs that can be assigned to each Join Vertex
-	//aisha debug_print(debug_level, Q_PLAN_LOG, "%s\n", "Enumerated all sets");
-	//aisha printAllEnumeratedSets(*Q);//aisha	
+	//debug_print(debug_level, Q_PLAN_LOG, "%s\n", "Enumerated all sets");
+	//printAllEnumeratedSets(*Q);//aisha	
 
-	//calculateNetworkSpeed();
 	findOptimalCompactGraph(*Q); //gets cost of all possible sub-graph combinations 
 	
 	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "------------OPTIMAL BASE GRAPH-----------------");
-	//printCompactGraph((*Q)->compactGraph, (*Q)->num_join_nodes); //aisha
+	//printCompactGraph((*Q)->compactGraph, (*Q)->num_join_nodes);
 	debug_print(debug_level, Q_PLAN_LOG,"Plan's cost: %lu\n", optimalCost);
-	//aisha debug_print(debug_level, Q_PLAN_LOG,"%s\n", "------------------------------------------------");
+	//debug_print(debug_level, Q_PLAN_LOG,"%s\n", "------------------------------------------------");
 
 	updateCompactGraph(Q);	//update optimalCompactGraph and Q->compactGraph with optimalSets
 
-/*aisha	print stored optimalSets. (compare with compactGraph)
-	printf("OPTIMIZER: optimal set of subGraphs\n");
-	for(int k = 0; k < numSlots; k++){
-		printf("\tJV %d\n", k);
-		CCond* temp;
-		
-		for(temp = optimalSets[k]; temp != NULL; temp = temp->next){
-			Condition *cond = temp->condition_p;
-			printf("\toptimal SG: %s ---> %s ---> %s\n", cond->subj, cond->pred, cond->obj);
-		}
-		
-		printf("\n");
-	}
-*/
-		
-/*aisha	print compactgraph
-	printf("OPTIMIZER: compactGraph\n");
-	
-	for(int k = 0; k< (*Q)->num_join_nodes; k++){
-		printf("\tJV %s\n", (*Q)->compactGraph[k]->label);
-		
-		CCond* temp = (*Q)->compactGraph[k]->subQ->optimalset;
-		
-		for(temp; temp != NULL; temp = temp->next){
-			Condition *cond = temp->condition_p;
-			printf("\toptimal SG: %s ---> %s ---> %s\n", cond->subj, cond->pred, cond->obj);
-		}
-		
-		printf("\n");
-	}
-*/
 
-//	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "------------OPTIMAL BASE GRAPH-----------------");
-//	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "The optimal base plan is:");
-//	printCompactGraph((*Q)->compactGraph, (*Q)->num_join_nodes); //aisha - print compactgraph if you need to.
-//	debug_print(debug_level, Q_PLAN_LOG,"Plan's cost: %lu\n", optimalCost);
-//	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "------------------------------------------------");
-	
-
-//	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "Started compacting");
+	//debug_print(debug_level, Q_PLAN_LOG,"%s\n", "Started compacting");
 
 	/*AISHA UNCOMMENT*/
 	mergeCompactGraph(*Q);	
@@ -129,13 +94,6 @@ void getOptimalPlanHelper (Query **Q)
 	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "------------OPTIMAL MERGED GRAPH-----------------");
 	debug_print(debug_level, Q_PLAN_LOG,"Plan's cost (optimal): %Lf\n", optimalCost);
 	
-//	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "Finished compacting");
-
-	//aisha printf("OPTIMIZER: CompactGraph after merge, after updating compactGraph\n");
-	//aisha printCompactGraph((*Q)->compactGraph, (*Q)->num_join_nodes);
-	
-	//aisha printf("OPTIMIZER: optimalCompactGraph after merge, after updating compactGraph\n");
-	//aisha printCompactGraph(optimalCompactGraph, (*Q)->num_join_nodes);	
 }
 
 void initOptimizer (Query *Q)
@@ -322,7 +280,7 @@ void findOptimalCompactGraph (Query *Q)
 				
 			
 			/* AISHA - change this back*/
-			printf("----------------> PLAN %d\n", numPlans);
+			//printf("----------------> PLAN %d\n", numPlans);
 			estimatePlanCost(Q);
 			
 			
@@ -414,7 +372,7 @@ void estimatePlanCost (Query *Q)
 
 	cost = estimateTotalPlanCost(Q,Q->compactGraph);
 	/*AISHA UNCOMMENT*/
-	printCompactGraph(Q->compactGraph, Q->num_join_nodes); //aisha - cost of graph plans
+	//printCompactGraph(Q->compactGraph, Q->num_join_nodes);
 	
 	debug_print(debug_level, Q_PLAN_LOG,"PLAN'S COST: %Lf\n", cost);
 	
@@ -565,11 +523,11 @@ void mergeCompactGraphRecuresively (Query *Q, Node *compactGraph[], int level, i
 			}*/
 			
 			numMergedPlans++;
-			printf("----------------> MERGED PLAN %d\n", numMergedPlans);
+			//printf("----------------> MERGED PLAN %d\n", numMergedPlans);
 			cost = estimateTotalPlanCost(Q, newCompactGraph);
 			
 			/*AISHA UNCOMMENT*/
-			printCompactGraph(newCompactGraph, Q->num_join_nodes); //aisha
+			//printCompactGraph(newCompactGraph, Q->num_join_nodes); //aisha
 			debug_print(debug_level, Q_PLAN_LOG,"MERGED PLAN'S COST: %Lf\n", cost);
 
 			/** AISHA check this **/

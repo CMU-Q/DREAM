@@ -14,7 +14,7 @@ long double estimateTotalPlanCost (Query *Q, Node *compactGraph[])
 	Node *joinNode, *starterNode = NULL;
 	
 
-	//aisha debug_print(debug_level, Q_PLAN_LOG,"%s\n", "Estimating the cost of the above plan");
+	//debug_print(debug_level, Q_PLAN_LOG,"%s\n", "Estimating the cost of the above plan");
 	
 	/*for each join node, find the result size of its subQ*/
 	for(int i = 0; i < Q->num_join_nodes; i++)
@@ -33,7 +33,7 @@ long double estimateTotalPlanCost (Query *Q, Node *compactGraph[])
 		
 		strcpy(joinNode->subQ->hashkey, hashkey);
 		
-		//printf("SubQKey: %s\n", joinNode->subQ->hashkey); //aisha
+		//printf("SubQKey: %s\n", joinNode->subQ->hashkey); 
 		
 		joinNode->subQ->resultSize = getResultSize
 		(joinNode, joinNode->subQ->hashkey, NULL, NULL);
@@ -124,9 +124,9 @@ void computeGraphCost_v2 (Query *Q, Node *starterNode, long double *estimateCost
 		/*start new commCost*/
 		//commCost = fsize; -AISHA - commCost directly stores fileSize
 		tempCommCost = commCost;
-		printf("tempCommCost = %Lf\n", tempCommCost);
+//		printf("tempCommCost = %Lf\n", tempCommCost);
 		tempCommCost = ceill(tempCommCost/networkSpeed);
-		printf("cost to transmit file = %Lf\n", tempCommCost);
+//		printf("cost to transmit file = %Lf\n", tempCommCost);
 		commCost = tempCommCost;
 		/*end new commCost*/
 	
@@ -170,9 +170,9 @@ void computeGraphCost_v2 (Query *Q, Node *starterNode, long double *estimateCost
 		// ngbr->node->label, starterNode->label, scanCost, cummCost);
 			
 		// (cummCost) ? 
-		printf("cummCost: %Lf", cummCost);
-		 printf("MAX(cummCost: %Lf, starterNode->subQ->cummCost: %Lf)\n", cummCost, starterNode->subQ->cummCost);
-		 printf("MAX(scanCost: %Lf, starterNode->subQ->cummCost: %Lf)\n", scanCost, starterNode->subQ->cummCost);
+		//printf("cummCost: %Lf", cummCost);
+		 //printf("MAX(cummCost: %Lf, starterNode->subQ->cummCost: %Lf)\n", cummCost, starterNode->subQ->cummCost);
+		 //printf("MAX(scanCost: %Lf, starterNode->subQ->cummCost: %Lf)\n", scanCost, starterNode->subQ->cummCost);
 		
 		
 		cummCost  = (cummCost) ? 
@@ -244,7 +244,7 @@ void computeGraphCost_v2 (Query *Q, Node *starterNode, long double *estimateCost
 			tempCommCost = commCost;
 			tempCommCost = ceill(tempCommCost/networkSpeed);
 			commCost = tempCommCost;
-			printf("\tnewCommCost: %Lf\n", commCost);
+		//	printf("\tnewCommCost: %Lf\n", commCost);
 			/*end new commCost*/
 			
 			
@@ -262,9 +262,6 @@ void computeGraphCost_v2 (Query *Q, Node *starterNode, long double *estimateCost
 		ngbr->node->subQ->cummCost = cummCost;
 		ngbr->node->subQ->hashJoinCost = hashJoinCost;
 		
-		
-		//REMOVED COMBINE SUBQKEYS + getResultSize from here and added to 
-		//just before calculating commCost
 	}
 	
 	for(Neighbor *ngbr = starterNode->out_neighbors;
@@ -374,9 +371,9 @@ long double costOfHashJoinBetween (Node *node, Neighbor *ngbr)
 	**/
 	//M = fsizeM; - AISHA M directly stores fileSize
 	tempM = M;
-	printf("tempM %Lf\n", tempM);
+//	printf("tempM %Lf\n", tempM);
 	tempM /= PAGE_SIZE;
-	printf("tempM/= PAGE_SIZE = %Lf\n", tempM);
+//	printf("tempM/= PAGE_SIZE = %Lf\n", tempM);
 	tempM = ceill(tempM);
 	//aisha printf("ceill(tempM) = %Lf\n", tempM);
 	M = tempM;
@@ -412,7 +409,7 @@ long double costOfHashJoinBetween (Node *node, Neighbor *ngbr)
 	//N = fsize; - N directly stores fileSize
 	tempN = N;
 	tempN /= PAGE_SIZE;
-	printf("tempN/= PAGE_SIZE = %Lf\n", tempN);
+//	printf("tempN/= PAGE_SIZE = %Lf\n", tempN);
 	tempN = ceill(tempN);
 	// printf("ceill(tempN) = %Lf\n", tempN);
 	N = tempN;
@@ -473,8 +470,8 @@ long double getResultSize (Node *joinNode, char *subQKey, Query *Q, Node *starte
 		/*end insert code*/
 		
 		/** size of file AISHA - might want to change this to double**/ 
-		printf("\tsize of file %hd-%s.txt = %Lf\n",
-		query_ndx, subQKey, size);
+		//printf("\tsize of file %hd-%s.txt = %Lf\n",
+		//query_ndx, subQKey, size);
 	
 		FILE *stream = fopen(STAT_FILE_1, "a");
 		fprintf(stream, "%s\t\t\t%Lf\n", subQKey, size);
@@ -547,7 +544,7 @@ long double getSubQResultSize(char *query, char *subQKey)
 	//diff_time.tv_usec = difftime % 1000000;
 
 	//printf("%s runtime: %ld.%06ld seconds\n", subQKey, 	runtime);
-	printf("%s runtime: %Lf seconds\n", subQKey, runtime);
+	//printf("%s runtime: %Lf seconds\n", subQKey, runtime);
 	
 		
 	/** save runtime in file to load in future runs **/

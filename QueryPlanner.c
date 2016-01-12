@@ -670,7 +670,7 @@ void assignNodeToWorker(Node *node, short status[])
 	node->worker_rank = MIN_RANK + worker;
 	// debug_print(debug_level, Q_PLAN_LOG, "Worker %hd\n", node->worker_rank);	
 	status[worker]  = !AVAILABLE;
-	printf(	"QUERYPLANNER: assignNode %s to worker %hd\n", node->label, node->worker_rank); //aisha
+//	printf(	"QUERYPLANNER: assignNode %s to worker %hd\n", node->label, node->worker_rank);
 
 
 	createSubQStr(node);
