@@ -20,11 +20,22 @@ long double networkSpeed = 20000000.0;
 void calculateNetworkSpeed(){
 	char speed_test_script[20] = "speed-test.sh";
 	char resultfile[20] = "speed.txt";
-	char other_machine[20] = "aishah-n2";
+	char other_machine[100];
 	char command[100];
 	int fsize;
 	FILE *stream;
 	
+	if(!(stream = fopen("machinefile", "r"))){
+		printf("Could not open machinefile\n");
+	}
+
+	for(int i = 0; i < 3; i++){
+		fgets(other_machine, sizeof(other_machine), stream);
+	}
+
+	fclose(stream);
+	printf("other machine: %s\n", other_machine);
+
 	//run speed test script to get upload and download speed		
 	sprintf(command, "./%s %s %s\n", speed_test_script, other_machine, resultfile);
 	

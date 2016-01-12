@@ -3,8 +3,7 @@ extern int debug_level;
 
 void doProxy() 
 {	
-	system("echo 'proxy was here' > proxy.txt"); // AISHA testing where client is located
-	
+
 	//printf("LDBL_MAX = %Lf\n", LDBL_MAX);
 
 	initQueryPlanner();
@@ -107,7 +106,7 @@ void doProxy()
 		fprintf(streamP, "%s", query);
 		fclose(streamP);
 
-		sprintf(command, "./DATA-EXECUTABLE/rdf3xquery %s < %s > %s", DB, infile, RESULT_FILE);
+		sprintf(command, "./rdf3x/rdf3xquery %s < %s > %s", DB, infile, RESULT_FILE);
 		
 		int sysid = system(command);
 

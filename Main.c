@@ -2,6 +2,7 @@
 
 int my_rank, query_ndx;
 int SHOULD_GET_NETWORK_SPEED;
+int SHOULD_LOAD_STATS;
 int DESIRED_PLAN_NDX = 1;
 int debug_level = 0;							 
 
@@ -23,18 +24,12 @@ char DB[100];
 	Function to print in usage instructions
 */
 void print_usage() {
-    printf("Usage: ./exec.sh [File name that contains the following:] \n");
-    printf("	[Query Index] (Greater than 0) \n");
+    printf("Usage: mpiexec -f machinefile ./dream input.txt [File name that contains the following:] \n");
+    printf("	[QUERY NUMBER] (Greater than 0) \n");
     printf("	[SHOULD_GET_NETWORK_SPEED] \n");
-    printf("	[TIME_FILE] \n");
-    printf("	[VOLUME_FILE] \n");
-    printf("	[QUERIES] \n");
-    printf("	[QUERY] \n");
-    printf("	[STAT_FILES] \n");
-    printf("	[STAT_FILE_1] \n");
-    printf("	[STAT_FILE_2] \n");
-    printf("	[RESULT_FILE] \n");
-    printf("	[DATABASE] \n");
+    printf("	[PATH TO FOLDER CONTAINING QUERIES] \n");
+    printf("	[PATH TO FOLDER CONTAINING STAT_FILES] \n");
+    printf("	[PATH TO DATABASE] \n");
     printf("	[DEBUG_LEVEL] 1: MISC. ERRORS\n");
     printf("	              2: MPI COMMUNICATION\n");
     printf("	              3: QUERY PLANNING INFO\n");
@@ -65,7 +60,7 @@ int main(int argc,char *argv[])
  
    if(fp==NULL)
 	{
-		perror("Error while opening the file.\n");
+		perror("Error while opening the input file.\n");
 		print_usage();
 		exit(EXIT_FAILURE);
 	}
@@ -82,100 +77,73 @@ int main(int argc,char *argv[])
 	// Retrieving results from input
 	int currentInput=0;
 	size_t len;
-	while (fgets (buf, sizeof(buf), fp)) 
+//	while (fgets (buf, sizeof(buf), fp)) - change for dynamic num args later
+	for(int k = 0; k < 6; k++)
 	{
+		fgets(buf, sizeof(buf), fp);
 		len = strlen(buf);
 		if (len > 0 && buf[len-1] == '\n') buf[len-2] = '\0';
 
         switch (currentInput) {   		
-			// [Query Index] (Greater than 0)
-            case 0 : 
-				query_ndx=atoi(buf);
-				if(query_ndx < 0){ 
-					printf("Query index must be integer");
-					print_usage();
-					return 0;
-				}
-                break;
-			// [SHOULD_GET_NETWORK_SPEED]
-			case 1:
-				SHOULD_GET_NETWORK_SPEED=atoi(buf);
-				break;
-             case 2 : 
-			// [TIME_FILE]
-				sprintf(TIME_FILE, "Time-Q%d", query_ndx);
-                break;			 
-			// [VOLUME_FILE]
-			 case 3 : 
-				sprintf(VOLUME_FILE, "Volume-Q%d", query_ndx);
-                break;
-			// [QUERIES]
-  			 case 4 : 
-				sprintf(QUERIES, "%s", buf);
-                break;
-			// [QUERY]
-			 case 5 : 
-				sprintf(QUERY_FILE,  "%s/Query%d", QUERIES, query_ndx);
-                break;
-			// [STAT_FILES]
-             case 6 : 
-				sprintf(STAT_FILES, "%s", buf);
-                break;
-			// [STAT_FILE_1]
-			 case 7 : 
-				sprintf(STAT_FILE_1, "%s/LUBMResultSizeStats-%d.txt", STAT_FILES, query_ndx);
-				break;	   
-			// [STAT_FILE_2]
-			 case 8 : 
-				sprintf(STAT_FILE_2, "%s/LUBMCostStats-%d.txt", STAT_FILES, query_ndx);
-                break;
-			// [RESULT_FILE]
-			 case 9 : 
-				sprintf(RESULT_FILE, "Result-Q%d", query_ndx);
-                break;
-			// [DATABASE]
-			 case 10 : 
-				sprintf(DB, "%s", buf); 
-                break;
-			// [DEBUG_LEVEL]	
-			 case 11 : 
-				debug_level=atoi(buf); 
-                break;	
-			 default:
-				printf("Invalid argument number given\n");
-				print_usage();			
+		// [Query Index] (Greater than 0)
+		case 0 : 
+			query_ndx=atoi(buf);
+			if(query_ndx < 0){ 
+				printf("Query index must be integer");
+				print_usage();
 				return 0;
+			}
+                	break;
+		// [SHOULD_GET_NETWORK_SPEED]
+		case 1:
+			SHOULD_GET_NETWORK_SPEED=atoi(buf);
+			break;
+		// [PATH_TO_QUERIES]
+		case 2 :
+			sprintf(QUERIES, "%s", buf);
+			break;		 
+		// [PATH_TO_STATS_FILES]
+		case 3 :
+			sprintf(STAT_FILES, "%s", buf); 
+			break;
+		// [PATH_TO_DATABASE]
+		case 4 : 
+       			sprintf(DB, "%s", buf); 
+			break;
+		// [DEBUG_LEVEL]
+		case 5 : 
+			debug_level=atoi(buf); 
+			break;
+		default:
+			printf("Invalid argument number given\n");
+			print_usage();			
+			return 0;
 		}   
 	   currentInput+=1;
 	}
 
-	// printf("------------------------------------------\n");
-		
-	sprintf(TIME_FILE, "Time-Q%d", query_ndx);
-	sprintf(VOLUME_FILE, "Volume-Q%d", query_ndx);
 	sprintf(QUERY_FILE,  "%s/Query%d", QUERIES, query_ndx);
+	sprintf(STAT_FILE_1, "%s/LUBMResStats-%d.txt", STAT_FILES, query_ndx);
+	sprintf(STAT_FILE_2, "%s/LUBMCostStats-%d.txt", STAT_FILES, query_ndx);
 	sprintf(RESULT_FILE, "Result-Q%d", query_ndx);
 	
-	sprintf(STAT_FILE_1, "LUBMResStats-%d.txt", query_ndx);
-	sprintf(STAT_FILE_2, "LUBMCostStats-%d.txt", query_ndx);
+	FILE *statsfile;
 
+	if(!(statsfile = fopen(STAT_FILE_1, "r"))){
+                SHOULD_LOAD_STATS = 0;
+	}
+	else{
+		fclose(statsfile);
 
-	// printf("------------------------------------------\n");
-	// printf("Values Retrieved:\n");
-	// printf("QNDX:%d \n",query_ndx);
-	// printf("TIME_FILE:%s \n",TIME_FILE);
-	// printf("VOLUME_FILE:%s \n",VOLUME_FILE);
-	// printf("QUERY_FILE:%s \n",QUERY_FILE);
-	// printf("RESULT_FILE:%s \n",RESULT_FILE);
-	// printf("STAT_FILE_1:%s \n",STAT_FILE_1);
-	// printf("STAT_FILE_2:%s \n",STAT_FILE_2);
-	// printf("STAT_FILES:%s \n",STAT_FILES);
-	// printf("QUERIES:%s \n",QUERIES);
-	// printf("DB:%s \n",DB);		
-	//SHOULD_GET_NETWORK_SPEED = atoi(argv[2]);
+		if(!(statsfile = fopen(STAT_FILE_2, "r"))){
+                	SHOULD_LOAD_STATS = 0;
+		}
+		else{
+			fclose(statsfile);
+			SHOULD_LOAD_STATS = 1;
+		}
+	}
 
-	// MPI_Init(&argc, &argv);
-	
 	int provided; 
 	MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE , &provided);
 	if(provided!=MPI_THREAD_MULTIPLE)
@@ -202,7 +170,7 @@ int main(int argc,char *argv[])
 
 		sprintf(infile,  "%s/Query%d\0", QUERIES, query_ndx);	
 		sprintf(outfile, "Result-Q%d-rdf\0", query_ndx);	
-		sprintf(command_rdf, "./DATA-EXECUTABLE/rdf3xquery %s < %s > %s", 
+		sprintf(command_rdf, "./rdf3x/rdf3xquery %s < %s > %s", 
 						DB, infile, outfile);
 
 		gettimeofday(&start_tv, NULL);

@@ -6,8 +6,7 @@ extern int debug_level;
 */
 void doClient() 
 {
-	system("echo 'client was here' > client.txt"); // AISHA testing where client is located
-	
+
 	MPI_Status status;
 	char *query = NULL;
 	char *result = NULL;

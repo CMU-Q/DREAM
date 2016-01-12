@@ -1,0 +1,14 @@
+2
+0
+./LUBMQueries
+./LUBMStats-RDFDB
+./databases/RDFDB
+0
+
+
+[query-number]
+[should-get-network-speed = 1 (get network speed) or 0 (use default)]
+[path-to-folder-containing-queries]
+[path-to-folder-containing-stats-files]
+[path-to-database]
+[debug-level = 1, 2 or 3]

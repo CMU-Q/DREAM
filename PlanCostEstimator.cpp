@@ -985,7 +985,7 @@ void loadResultSizeStats (const char *filename)
 	FILE *stream;
 
 	if(!(stream = fopen(filename, "r")))
-	systemError((char*)"Could not load stats file\n");
+		systemError((char*)"Could not load stats file\n");
 
 	while (fscanf(stream, "%ms\t\t\t%Lf", &subQkey, &resultSize) == 2)
 	{
@@ -1002,7 +1002,7 @@ void loadScanSizeStats (const char *filename)
 	FILE *stream;
 
 	if(!(stream = fopen(filename, "r")))
-	systemError((char*)"Could not load stats file\n");
+		systemError((char*)"Could not load stats file\n");
 
 	while (fscanf(stream, "%ms\t\t\t%Lf", &subQkey, &scanSize) == 2)
 	{

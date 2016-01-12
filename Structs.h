@@ -22,6 +22,7 @@ extern char STAT_FILE_2[100];
 
 extern int DESIRED_PLAN_NDX;
 extern int SHOULD_GET_NETWORK_SPEED;
+extern int SHOULD_LOAD_STATS;
 extern long double networkSpeed;
 
 typedef uint64_t ulong;

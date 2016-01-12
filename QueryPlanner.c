@@ -12,7 +12,9 @@ short QID = 1;
 
 void initQueryPlanner ()
 {	
-	//loadStats();
+	if(SHOULD_LOAD_STATS){
+		loadStats();
+	}
 }
 
 Query *planQuery (char *query)
