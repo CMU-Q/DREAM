@@ -25,7 +25,7 @@ void calculateNetworkSpeed(){
 	int fsize;
 	FILE *stream;
 	
-	if(!(stream = fopen("host_file", "r"))){
+	if(!(stream = fopen("machinefile", "r"))){
 		printf("Could not open machinefile\n");
 	}
 
