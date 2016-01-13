@@ -21,7 +21,7 @@ char DB[100];
 
 
 /*
-	Function to print in usage instructions
+	Print usage instructions
 */
 void print_usage() {
     printf("Usage: mpiexec -f machinefile ./dream input.txt [File name that contains the following:] \n");
