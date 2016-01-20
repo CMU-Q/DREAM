@@ -33,13 +33,13 @@ long double estimateTotalPlanCost (Query *Q, Node *compactGraph[])
 		
 		strcpy(joinNode->subQ->hashkey, hashkey);
 		
-		//printf("SubQKey: %s\n", joinNode->subQ->hashkey); 
-		
 		joinNode->subQ->resultSize = getResultSize
 		(joinNode, joinNode->subQ->hashkey, NULL, NULL);
-
-		if((long double) joinNode->subQ->resultSize < 0)
-			{return -1;}
+		
+		if((long double) joinNode->subQ->resultSize < 0){
+			Q->num_join_nodes = -1;
+			return -1;
+		}
 
 		joinNode->subQ->scanSize = getScanSize
 		(joinNode, joinNode->subQ->hashkey, NULL, NULL);
@@ -427,11 +427,9 @@ long double getResultSize (Node *joinNode, char *subQKey, Query *Q, Node *starte
 	
 	//long double size = SOME_LARGE_VALUE; //initialize to avoid reading random values.
 	long double size = LDBL_MAX; //initialize to avoid reading random values.
-
-	
-	//std::cout << "Returning the stats for " << subQKey << std::endl;
-
 	iter = resultSizeStatsTable.find(subQKey);
+	
+	//getSubQScanStatistics(joinNode->subQ->qstring);
 	
 	if(iter != resultSizeStatsTable.end())
 	{
@@ -453,10 +451,21 @@ long double getResultSize (Node *joinNode, char *subQKey, Query *Q, Node *starte
 		else
 			{combineSubQStrs(Q, starterNode, joinNode);}	//aisha
 		
-//		printf("subQ string:\n\t %s\n", joinNode->subQ->qstring);
-		
 		size = getSubQResultSize(joinNode->subQ->qstring, subQKey); //AISHA
+		//getSubQScanStatistics(joinNode->subQ->qstring);
+		
+		/*start code to keep a copy of rdf scan statistics file - AISHA
+		char command[100];
+		char resultfile[1024];
 
+		// rename temp file to keep a copy for debugging purposes
+		sprintf(resultfile, "%d-%s-scan", query_ndx, subQKey);		
+		sprintf(command, "mv temp_scan_result.txt \"%s.txt\"", resultfile);
+	
+		if(system(command) < 0)
+			printf("Failed to rename temp_scan_result file\n");	
+		end insert code */
+			
 		/*start insert code to keep a copy of rdf result file - AISHA
 		char command[100];
 		char resultfile[1024];
@@ -479,11 +488,76 @@ long double getResultSize (Node *joinNode, char *subQKey, Query *Q, Node *starte
 
 		resultSizeStatsTable.insert(std::make_pair(subQKey,size));
 	
-		return size;
+		if(size < 0){
+			return -1;
+		}
+		else{
+			return size;	
+		}
 	}
 }
 	
-			
+void getSubQScanStatistics(char *query)
+{
+	char command[100];
+	double size = 0;
+	double value;
+	char *infile;
+	char *outfile;
+	FILE *stream;
+	char *plan;
+
+	unsigned long cost = 0;
+	char *statsfile;
+	
+	// /*statsfile = "costFile.txt";
+	
+	// FILE *file = fopen(statsfile, "r");
+	// fscanf(file, "%lu", &cost);
+
+	// system("rm costFile.txt");
+
+	// if(system(command) < 0)
+	// printf("Failed to remove costFile.txt");
+	// /*
+	
+	infile  = "temp_scan_query.txt";
+	outfile = "temp_scan_result.txt";
+
+	stream = fopen(infile, "w");
+	fprintf(stream, "explain %s", query);
+	fclose(stream);
+
+	sprintf(command, "./rdf3xquery %s < %s > %s",
+	DB, infile, outfile);
+
+	if(system(command) < 0)
+		printf("Failed to execute RDF3xquery");
+
+	plan = read_file(outfile);	
+	plan = strtok(plan, " ");
+
+	printf("reached subQScanStats\n");
+	
+	while (plan != NULL)
+	{
+		plan = strtok (NULL, " ");
+
+		if(plan != NULL)
+			{value = strtod(plan, NULL);}
+		
+		if(value >= 0)
+			{
+				printf("\tvalue: %f\n", value);
+				size += value;}
+	}
+	
+	//printf("\tSize: %f\n", size);
+	stream = fopen(outfile, "a");
+	fprintf(stream, "TOTAL: %f\n", size);
+	fclose(stream);
+}
+		
 /** Scan time will always be there - it's calculated in getSubQResultSize **/
 long double getScanSize (Node *joinNode, char *subQKey, Query *Q, Node *starterNode)
 {
@@ -540,11 +614,6 @@ long double getSubQResultSize(char *query, char *subQKey)
 	/** calculate runtime **/
 	long double runtime = (end_time.tv_usec + 1000000 * end_time.tv_sec) - (start_time.tv_usec + 1000000 * start_time.tv_sec);
 	runtime = runtime/1000000;
-	//diff_time.tv_sec = difftime / 1000000;
-	//diff_time.tv_usec = difftime % 1000000;
-
-	//printf("%s runtime: %ld.%06ld seconds\n", subQKey, 	runtime);
-	//printf("%s runtime: %Lf seconds\n", subQKey, runtime);
 	
 		
 	/** save runtime in file to load in future runs **/
@@ -555,7 +624,6 @@ long double getSubQResultSize(char *query, char *subQKey)
 	/** save runtime in table **/	
 	scanSizeStatsTable.insert(std::make_pair(subQKey,runtime));
 		
-		
 	//sprintf(command, "wc -l %s > %s", outfile, statsfile);
 
 	// if(system(command) < 0)
@@ -564,6 +632,13 @@ long double getSubQResultSize(char *query, char *subQKey)
 	// FILE *file = fopen(statsfile, "r");
 	// fscanf(file, "%lu", &size);
 
+
+	if(!strcmp(read_file(outfile), "<empty result>\n")){
+		printf("SUB-Q empty result set\n");
+		return -1;
+	}
+	
+	
 	if(!(stream = fopen(outfile, "r")))
 		printf("Could not open temp rdf result file\n");
 

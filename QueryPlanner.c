@@ -47,7 +47,10 @@ Query *planQuery (char *query)
 	//printSupersets(Q);
 	
 	getOptimalPlan(&Q); 
-
+	
+	if(Q->num_join_nodes < 0){
+		return Q;
+	}
 
 	//printf("QUERYPLANNER: got optimal plan\n");
 

@@ -17,6 +17,8 @@ extern int query_ndx;
    
 extern char QUERY_FILE[100];
 extern char RESULT_FILE[100];
+extern char MACHINE_FILE[100];
+
 extern char STAT_FILE_1[100];
 extern char STAT_FILE_2[100];
 

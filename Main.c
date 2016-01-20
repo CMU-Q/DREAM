@@ -11,6 +11,7 @@ char VOLUME_FILE[100];
 
 char QUERY_FILE[100];
 char RESULT_FILE[100];
+char MACHINE_FILE[100];
 
 char STAT_FILE_1[100];
 char STAT_FILE_2[100];
@@ -27,6 +28,7 @@ void print_usage() {
     printf("Usage: mpiexec -f machinefile ./dream input.txt [File name that contains the following:] \n");
     printf("	[QUERY NUMBER] (Greater than 0) \n");
     printf("	[SHOULD_GET_NETWORK_SPEED] \n");
+	printf("	[PATH TO MACHINE FILE] \n");
     printf("	[PATH TO FOLDER CONTAINING QUERIES] \n");
     printf("	[PATH TO FOLDER CONTAINING STAT_FILES] \n");
     printf("	[PATH TO DATABASE] \n");
@@ -78,7 +80,7 @@ int main(int argc,char *argv[])
 	int currentInput=0;
 	size_t len;
 //	while (fgets (buf, sizeof(buf), fp)) - change for dynamic num args later
-	for(int k = 0; k < 6; k++)
+	for(int k = 0; k < 7; k++)
 	{
 		fgets(buf, sizeof(buf), fp);
 		len = strlen(buf);
@@ -98,20 +100,29 @@ int main(int argc,char *argv[])
 		case 1:
 			SHOULD_GET_NETWORK_SPEED=atoi(buf);
 			break;
-		// [PATH_TO_QUERIES]
+		// [MACHINE_FILE]
 		case 2 :
+			sprintf(MACHINE_FILE, "%s", buf);
+			
+			char *pos;
+			if((pos = strchr(MACHINE_FILE, '\n')) != NULL){
+				*pos = '\0';
+			}
+			break;
+		// [PATH_TO_QUERIES]
+		case 3 :
 			sprintf(QUERIES, "%s", buf);
 			break;		 
 		// [PATH_TO_STATS_FILES]
-		case 3 :
+		case 4 :
 			sprintf(STAT_FILES, "%s", buf); 
 			break;
 		// [PATH_TO_DATABASE]
-		case 4 : 
+		case 5 : 
        			sprintf(DB, "%s", buf); 
 			break;
 		// [DEBUG_LEVEL]
-		case 5 : 
+		case 6 : 
 			debug_level=atoi(buf); 
 			break;
 		default:
@@ -122,10 +133,15 @@ int main(int argc,char *argv[])
 	   currentInput+=1;
 	}
 
+	printf("stat files: %s\n", STAT_FILES);
+	
 	sprintf(QUERY_FILE,  "%s/Query%d", QUERIES, query_ndx);
 	sprintf(STAT_FILE_1, "%s/LUBMResStats-%d.txt", STAT_FILES, query_ndx);
 	sprintf(STAT_FILE_2, "%s/LUBMCostStats-%d.txt", STAT_FILES, query_ndx);
 	sprintf(RESULT_FILE, "Result-Q%d", query_ndx);
+
+	printf("stat_file_1: %s\n", STAT_FILE_1);
+	printf("stat_file_2: %s\n", STAT_FILE_2);
 	
 	FILE *statsfile;
 
@@ -160,7 +176,7 @@ int main(int argc,char *argv[])
 	
 	else if (my_rank == PROXY)
 	{
-	
+		
 		doProxy();
 	}
 	

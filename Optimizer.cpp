@@ -25,10 +25,11 @@ void calculateNetworkSpeed(){
 	int fsize;
 	FILE *stream;
 	
-	if(!(stream = fopen("machinefile", "r"))){
+	if(!(stream = fopen(MACHINE_FILE, "r"))){
 		printf("Could not open machinefile\n");
 	}
 
+	//get the 3rd machine listed (i.e. not client or master)
 	for(int i = 0; i < 3; i++){
 		fgets(other_machine, sizeof(other_machine), stream);
 	}
@@ -39,8 +40,7 @@ void calculateNetworkSpeed(){
 	if((pos = strchr(other_machine, '\n')) != NULL){
 		*pos = '\0';
 	}
-	printf("other machine: %s\n", other_machine);
-
+	
 	//run speed test script to get upload and download speed		
 	sprintf(command, "./%s %s %s\n", speed_test_script, other_machine, resultfile);
 	
@@ -63,6 +63,7 @@ void calculateNetworkSpeed(){
 void getOptimalPlanHelper (Query **Q)
 {
 	initOptimizer(*Q);
+	
 	if(SHOULD_GET_NETWORK_SPEED){
 		calculateNetworkSpeed();
 	}
@@ -75,6 +76,11 @@ void getOptimalPlanHelper (Query **Q)
 	//printAllEnumeratedSets(*Q);//aisha	
 
 	findOptimalCompactGraph(*Q); //gets cost of all possible sub-graph combinations 
+	printf("found optimal base graph\n");
+	//add check for Q->num_join_nodes < 0
+	if((*Q)->num_join_nodes < 0){
+		return;
+	}
 	
 	debug_print(debug_level, Q_PLAN_LOG,"%s\n", "------------OPTIMAL BASE GRAPH-----------------");
 	//printCompactGraph((*Q)->compactGraph, (*Q)->num_join_nodes);
@@ -283,7 +289,10 @@ void findOptimalCompactGraph (Query *Q)
 			//printf("----------------> PLAN %d\n", numPlans);
 			estimatePlanCost(Q);
 			
-			
+			if(Q->num_join_nodes < 0){
+				return;
+			}
+							
 			//temp(Q);
 		}
 		
@@ -374,12 +383,19 @@ void estimatePlanCost (Query *Q)
 	/*AISHA UNCOMMENT*/
 	//printCompactGraph(Q->compactGraph, Q->num_join_nodes);
 	
+	//add check for Q->num_join_nodes < 0
+	if(Q->num_join_nodes < 0){
+		debug_print(debug_level, Q_PLAN_LOG, "%s", "A sub-query had an empty result set\n");	
+		return;
+	}
+		
+	
 	debug_print(debug_level, Q_PLAN_LOG,"PLAN'S COST: %Lf\n", cost);
 	
 	if((long double) cost < 0)
 	{
 		debug_print(debug_level, Q_PLAN_LOG,"%s", "REJECTED THE ABOVE COMPACT GRAPH");
-		debug_print(debug_level, Q_PLAN_LOG,"%s\n", "AS IT PRODUCES INTERNAL ERROR:");
+		debug_print(debug_level, Q_PLAN_LOG,"%s", "AS IT PRODUCES INTERNAL ERROR:\n");
 		return; 
 	}
 

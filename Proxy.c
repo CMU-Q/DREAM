@@ -66,9 +66,25 @@ void doProxy()
 	//	startTime = time(NULL);		//aisha
 	gettimeofday(&start_tv, NULL);
 
-	
+	/***** If there is an empty result Set ****/
+	//add check for Q->num_join_nodes < 0 - AISHA
+	if(Q->num_join_nodes < 0){
+		//stuff to tell it's an empty resultFile
+		if((stream = fopen(RESULT_FILE,"w+")) == NULL) {
+			systemError("Couldn't create a result file");
+			debug_print(debug_level, ERROR_LOG, "%s\n",  
+						"Couldn't create a result file");	
+		}
+
+		char *no_match = "<empty result>\0";
+	 
+		fwrite(no_match, sizeof(char), strlen(no_match), stream);
+		fclose(stream);
+
+		final_result = readFile(RESULT_FILE);
+	}
 	/***** If one machine (the PROXY) can handle the client (<=1 join node) ****/
-	if(Q->num_join_nodes <= 1
+	else if(Q->num_join_nodes <= 1
 			|| Q->num_join_nodes - Q->num_merged_nodes <= 1)
 	{
 
@@ -170,37 +186,6 @@ void doProxy()
 			if(syscleanid < 0)
 				debug_print(debug_level, ERROR_LOG, "%s\n", "Failed to issue make clean");
 			
-			/** sort the ids before converting - execvp version**/
-			//int execvp(const char *file, char *const argv[]);
-	
-			/*char *argsvp[5];
-			argsvp[0] = ;
-			argsvp[1] = "-n";
-			argsvp[2] = "-o";
-			argsvp[3] = filename;
-			argsvp[4] = filename;
-			
-			char commandsort[20];
-			sprintf(commandsort, "sort -nr -o %s %s", filename, filename);
-			printf("command to sort: \"%s\"\n", commandsort);
-			char *argsvp[] = { "/bin/bash", "-c", commandsort, NULL};
-			
-			pid_t pid = fork();
-
-			if (pid == -1) {
-				perror("fork failed");
-				exit(EXIT_FAILURE);
-			}
-			else if (pid == 0) {//child
-				printf("before execvp\n");
-				execvp(argsvp[0], argsvp);
-			}
-			else{
-				int status;
-				(void)waitpid(pid, &status, 0);
-			}
-			*/
-			
 			/** sort the ids before converting **/
 			char command_sort[256];
 			sprintf(command_sort, "sort -n -o %s %s", filename, filename);//aisha - change this line back
@@ -254,7 +239,7 @@ void doProxy()
 	(strcmp(final_result, "\n") == 0) ||
 	(strcmp(final_result, "\0") == 0)
 	){
-
+		//add check - do we need to include these steps in Q->num_join_nodes < 0?
 		if((stream = fopen(RESULT_FILE,"w+")) == NULL) {
 			systemError("Couldn't create a result file");
 			debug_print(debug_level, ERROR_LOG, "%s\n",  
@@ -282,8 +267,8 @@ void doProxy()
 	diff_tv.tv_sec = diff / 1000000;
 	diff_tv.tv_usec = diff % 1000000;
 
-	//printf("dream: ");
-	//printf("%ld.%06ld\n", diff_tv.tv_sec, diff_tv.tv_usec);
+	printf("dream: ");
+	printf("%ld.%06ld\n", diff_tv.tv_sec, diff_tv.tv_usec);
 
 	//debug_print(debug_level, COMM_LOG, "TOTAL_TIME: %d\n", diff);	
 

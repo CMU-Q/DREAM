@@ -56,6 +56,7 @@ long double costOfHashJoinBetween (Node *node, Neighbor *ngbr);
 
 long double costOfHashJoinBetween (Node *node, Node *ngbr);
 long double getResultSize (Node *node, char *subQkey, Query *Q, Node *starterNode);
+void getSubQScanStatistics(char *query);
 long double getScanSize (Node *joinNode, char *subQKey, Query *Q, Node *starterNode);
 
 long double getSubQResultSize(char *query, char *subQKey);
